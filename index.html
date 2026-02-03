@@ -17,19 +17,15 @@ body{
   margin:auto;
   padding:10px;
 }
-
-/* Banner */
 .banner{
   display:flex;
   gap:8px;
-  justify-content:center;
   margin-bottom:10px;
 }
 .banner img{
   width:50%;
   border-radius:10px;
 }
-
 .card{
   background:#0f172a;
   padding:10px;
@@ -38,11 +34,9 @@ body{
 }
 h2{
   text-align:center;
-  margin:5px 0 8px;
   font-size:16px;
+  margin:5px 0 8px;
 }
-
-/* Inputs */
 select,input,textarea{
   width:100%;
   padding:8px;
@@ -51,8 +45,6 @@ select,input,textarea{
   border:none;
   margin-bottom:6px;
 }
-
-/* Buttons */
 button{
   width:100%;
   padding:6px;
@@ -62,8 +54,6 @@ button{
   border:none;
   cursor:pointer;
 }
-
-/* Button Colors */
 .big{background:#22c55e;color:black;}
 .small{background:#ef4444;color:black;}
 .green{background:#16a34a;color:black;}
@@ -73,22 +63,18 @@ button{
 .hold{background:#eab308;color:black;}
 .send{background:#a78bfa;color:black;}
 
-/* Grid Buttons */
 .signal-buttons{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:5px;
-  margin-top:6px;
 }
-
-/* Signal Box */
 .signal-box{
-  font-size:18px;
-  text-align:center;
+  background:#020617;
   padding:10px;
   border-radius:10px;
+  text-align:center;
+  font-size:18px;
   margin-top:6px;
-  background:#020617;
 }
 .wait{color:#eab308;}
 .hide{display:none;}
@@ -116,28 +102,24 @@ button{
   <h2>ADMIN PANEL</h2>
 
   <select id="wingo">
-    <option>Wingo 30 Seconds</option>
-    <option>Wingo 1 Minute</option>
-    <option>Wingo 3 Minutes</option>
-    <option>Wingo 5 Minutes</option>
+    <option value="30">Wingo 30 Seconds</option>
+    <option value="60">Wingo 1 Minute</option>
+    <option value="180">Wingo 3 Minutes</option>
+    <option value="300">Wingo 5 Minutes</option>
   </select>
 
-  <!-- Custom Message -->
-  <textarea id="customText" rows="2" placeholder="এখানে যেকোনো মেসেজ লিখুন..."></textarea>
+  <textarea id="customText" rows="2" placeholder="এখানে মেসেজ লিখুন..."></textarea>
   <button class="send" onclick="sendCustom()">SEND MESSAGE</button>
 
-  <!-- Signal Buttons -->
   <div class="signal-buttons">
     <button class="start" onclick="sendSignal('START')">START</button>
     <button class="off" onclick="sendSignal('OFF')">OFF</button>
     <button class="hold" onclick="sendSignal('HOLD')">HOLD</button>
-
     <button class="big" onclick="sendSignal('BIG')">BIG</button>
     <button class="small" onclick="sendSignal('SMALL')">SMALL</button>
-    <button class="green" onclick="sendSignal('GREEN 🟢')">GREEN</button>
-
-    <button class="red" onclick="sendSignal('RED 🔴')">RED</button>
-    <button class="big" onclick="sendSignal('PROFIT 💸')">PROFIT</button>
+    <button class="green" onclick="sendSignal('GREEN')">GREEN</button>
+    <button class="red" onclick="sendSignal('RED')">RED</button>
+    <button class="big" onclick="sendSignal('PROFIT')">PROFIT</button>
   </div>
 </div>
 
@@ -157,17 +139,15 @@ button{
 
 <script>
 const ADMIN_PASSWORD = "12345";
-
 function login(){
   if(password.value === ADMIN_PASSWORD){
     loginBox.classList.add("hide");
     adminBox.classList.remove("hide");
-  }else{
-    alert("Wrong Password");
-  }
+  }else alert("Wrong Password");
 }
 
-const firebaseConfig = {
+// Firebase
+firebase.initializeApp({
   apiKey: "AIzaSyBmvhGbc7NA9uLdFGkvdWnej-SdgNzk5yk",
   authDomain: "big-small-86ed8.firebaseapp.com",
   databaseURL: "https://big-small-86ed8-default-rtdb.firebaseio.com",
@@ -175,31 +155,75 @@ const firebaseConfig = {
   storageBucket: "big-small-86ed8.appspot.com",
   messagingSenderId: "139562557169",
   appId: "1:139562557169:web:16866c69c54bd9e8005350"
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const signalRef = db.ref("liveSignal");
 
+let timer;
+const timedSignals = ["BIG","SMALL","GREEN","RED"];
+
 function sendSignal(signal){
-  signalRef.set({
-    wingo: wingo.value,
-    signal: signal,
-    text: ""
-  });
+  clearInterval(timer);
+  signalRef.set({ signal, text:"", wingo:"LIVE SIGNAL" });
+
+  speak(signal);
+
+  if(timedSignals.includes(signal)){
+    startTimer(parseInt(wingo.value));
+  }
 }
 
 function sendCustom(){
-  if(customText.value.trim() === "") return;
+  if(customText.value.trim()==="") return;
+  clearInterval(timer);
   signalRef.set({
-    wingo: wingo.value,
-    signal: "MESSAGE",
-    text: customText.value
+    signal:"MESSAGE",
+    text:customText.value,
+    wingo:"ADMIN MESSAGE"
   });
-  customText.value = "";
+  speak("MESSAGE");
+  customText.value="";
 }
 
-signalRef.on("value", snap=>{
+function startTimer(seconds){
+  let t = seconds;
+  timer = setInterval(()=>{
+    if(t<=0){
+      clearInterval(timer);
+      signalRef.update({ wingo:"WAITING..." });
+    }else{
+      signalRef.update({ wingo:`${t}s` });
+      t--;
+    }
+  },1000);
+}
+
+// Bangla AI Voice
+function speak(signal){
+  if(!window.speechSynthesis) return;
+
+  let map = {
+    BIG:"বিগ সিগনাল",
+    SMALL:"স্মল সিগনাল",
+    GREEN:"গ্রিন সিগনাল",
+    RED:"রেড সিগনাল",
+    START:"স্টার্ট",
+    OFF:"অফ",
+    HOLD:"হোল্ড",
+    PROFIT:"প্রফিট",
+    MESSAGE:"এডমিন মেসেজ"
+  };
+
+  const msg = new SpeechSynthesisUtterance(map[signal] || signal);
+  msg.lang="bn-BD";
+  msg.rate=0.95;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(msg);
+}
+
+// User Listener
+signalRef.on("value",snap=>{
   if(!snap.exists()) return;
   showWingo.innerText = snap.val().wingo;
   showSignal.innerText = snap.val().signal;

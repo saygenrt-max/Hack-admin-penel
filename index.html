@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Wingo Signal System</title>
@@ -17,8 +17,6 @@ body{
   margin:auto;
   padding:10px;
 }
-
-/* Banner */
 .banner{
   display:flex;
   gap:8px;
@@ -28,11 +26,9 @@ body{
   width:50%;
   border-radius:10px;
 }
-
-/* Card */
 .card{
   background:#0f172a;
-  padding:12px;
+  padding:10px;
   border-radius:14px;
   margin-bottom:10px;
 }
@@ -41,8 +37,6 @@ h2{
   font-size:16px;
   margin:5px 0 8px;
 }
-
-/* Inputs */
 select,input,textarea{
   width:100%;
   padding:8px;
@@ -51,17 +45,14 @@ select,input,textarea{
   border:none;
   margin-bottom:6px;
 }
-
-/* Buttons */
 button{
   width:100%;
-  padding:8px;
-  font-size:14px;
+  padding:6px;
+  font-size:12px;
   font-weight:bold;
   border-radius:6px;
   border:none;
   cursor:pointer;
-  margin-bottom:5px;
 }
 .big{background:#22c55e;color:black;}
 .small{background:#ef4444;color:black;}
@@ -71,19 +62,15 @@ button{
 .off{background:#6b7280;color:white;}
 .hold{background:#eab308;color:black;}
 .send{background:#a78bfa;color:black;}
-.activate{background:#f97316;color:black;}
 
-/* Signal Buttons Grid */
 .signal-buttons{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:5px;
 }
-
-/* Signal Box */
 .signal-box{
   background:#020617;
-  padding:12px;
+  padding:10px;
   border-radius:10px;
   text-align:center;
   font-size:18px;
@@ -136,11 +123,6 @@ button{
   </div>
 </div>
 
-<!-- Activate Voice Button -->
-<div class="card">
-  <button id="activateVoiceBtn" class="activate">ভয়েস চালু করতে ট্যাপ করুন</button>
-</div>
-
 <!-- User Panel -->
 <div class="card">
   <h2>LIVE SIGNAL</h2>
@@ -157,8 +139,6 @@ button{
 
 <script>
 const ADMIN_PASSWORD = "12345";
-
-// Admin Login
 function login(){
   if(password.value === ADMIN_PASSWORD){
     loginBox.classList.add("hide");
@@ -166,7 +146,7 @@ function login(){
   }else alert("Wrong Password");
 }
 
-// Firebase Config
+// Firebase
 firebase.initializeApp({
   apiKey: "AIzaSyBmvhGbc7NA9uLdFGkvdWnej-SdgNzk5yk",
   authDomain: "big-small-86ed8.firebaseapp.com",
@@ -182,16 +162,7 @@ const signalRef = db.ref("liveSignal");
 
 let timer;
 const timedSignals = ["BIG","SMALL","GREEN","RED"];
-let voiceActivated = false;
 
-// Activate Voice Button (for Telegram/In-App Browser)
-document.getElementById("activateVoiceBtn").addEventListener("click", ()=>{
-  voiceActivated = true;
-  alert("ভয়েস সফলভাবে চালু হয়েছে! এখন Signal এর শব্দ শোনা যাবে।");
-  document.getElementById("activateVoiceBtn").classList.add("hide");
-});
-
-// Send Signal
 function sendSignal(signal){
   clearInterval(timer);
   signalRef.set({ signal, text:"", wingo:"LIVE SIGNAL" });
@@ -203,7 +174,6 @@ function sendSignal(signal){
   }
 }
 
-// Send Custom Message
 function sendCustom(){
   if(customText.value.trim()==="") return;
   clearInterval(timer);
@@ -212,11 +182,10 @@ function sendCustom(){
     text:customText.value,
     wingo:"ADMIN MESSAGE"
   });
-  speak("MESSAGE", customText.value);
+  speak("MESSAGE");
   customText.value="";
 }
 
-// Timer Function
 function startTimer(seconds){
   let t = seconds;
   timer = setInterval(()=>{
@@ -230,9 +199,9 @@ function startTimer(seconds){
   },1000);
 }
 
-// Speak Function (Bangla AI Voice)
-function speak(signal, customText=""){
-  if(!voiceActivated || !window.speechSynthesis) return;
+// Bangla AI Voice
+function speak(signal){
+  if(!window.speechSynthesis) return;
 
   let map = {
     BIG:"বিগ সিগনাল",
@@ -243,7 +212,7 @@ function speak(signal, customText=""){
     OFF:"অফ",
     HOLD:"হোল্ড",
     PROFIT:"প্রফিট",
-    MESSAGE: customText || "এডমিন মেসেজ"
+    MESSAGE:"এডমিন মেসেজ"
   };
 
   const msg = new SpeechSynthesisUtterance(map[signal] || signal);
@@ -259,9 +228,6 @@ signalRef.on("value",snap=>{
   showWingo.innerText = snap.val().wingo;
   showSignal.innerText = snap.val().signal;
   showText.innerText = snap.val().text || "---";
-
-  // Play voice for user panel signals
-  speak(snap.val().signal, snap.val().text);
 });
 </script>
 

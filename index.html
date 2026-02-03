@@ -15,62 +15,80 @@ body{
 .container{
   max-width:420px;
   margin:auto;
-  padding:15px;
+  padding:10px;
 }
 
-/* 🔰 Banner */
+/* Banner */
 .banner{
   display:flex;
-  gap:10px;
+  gap:8px;
   justify-content:center;
-  align-items:center;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 .banner img{
   width:50%;
-  border-radius:14px;
+  border-radius:10px;
 }
 
 .card{
   background:#0f172a;
   padding:10px;
   border-radius:14px;
-  margin-bottom:15px;
+  margin-bottom:10px;
 }
 h2{
   text-align:center;
-  margin-top:0;
-}
-select,button,input{
-  width:100%;
-  padding:12px;
+  margin:5px 0 8px;
   font-size:16px;
-  margin:8px 0;
-  border-radius:10px;
-  border:none;
 }
+
+/* Inputs */
+select,input,textarea{
+  width:100%;
+  padding:8px;
+  font-size:13px;
+  border-radius:8px;
+  border:none;
+  margin-bottom:6px;
+}
+
+/* Buttons */
 button{
+  width:100%;
+  padding:6px;
+  font-size:12px;
   font-weight:bold;
+  border-radius:6px;
+  border:none;
   cursor:pointer;
 }
+
+/* Button Colors */
 .big{background:#22c55e;color:black;}
 .small{background:#ef4444;color:black;}
 .green{background:#16a34a;color:black;}
 .red{background:#dc2626;color:black;}
+.start{background:#0ea5e9;color:black;}
+.off{background:#6b7280;color:white;}
+.hold{background:#eab308;color:black;}
+.send{background:#a78bfa;color:black;}
 
+/* Grid Buttons */
 .signal-buttons{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:10px;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:6px;
 }
 
+/* Signal Box */
 .signal-box{
-  font-size:28px;
+  font-size:18px;
   text-align:center;
-  padding:15px;
-  border-radius:12px;
-  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  margin-top:6px;
+  background:#020617;
 }
 .wait{color:#eab308;}
 .hide{display:none;}
@@ -80,65 +98,75 @@ button{
 <body>
 <div class="container">
 
-<!-- 🔰 Banner (Two Images) -->
+<!-- Banner -->
 <div class="banner">
   <img src="https://i.postimg.cc/YSXSXmXZ/Picsart-26-02-03-01-36-40-279.png">
   <img src="https://i.postimg.cc/hjpt5Q2c/images-(1).jpg">
 </div>
 
-<!-- 🔐 Admin Login -->
+<!-- Admin Login -->
 <div class="card" id="loginBox">
   <h2>ADMIN LOGIN</h2>
   <input type="password" id="password" placeholder="Admin Password">
   <button onclick="login()">LOGIN</button>
 </div>
 
-<!-- 🛠️ Admin Panel -->
+<!-- Admin Panel -->
 <div class="card hide" id="adminBox">
   <h2>ADMIN PANEL</h2>
 
   <select id="wingo">
-    <option value="Wingo 30 Seconds">Wingo 30 Seconds</option>
-    <option value="Wingo 1 Minute">Wingo 1 Minute</option>
-    <option value="Wingo 3 Minutes">Wingo 3 Minutes</option>
-    <option value="Wingo 5 Minutes">Wingo 5 Minutes</option>
+    <option>Wingo 30 Seconds</option>
+    <option>Wingo 1 Minute</option>
+    <option>Wingo 3 Minutes</option>
+    <option>Wingo 5 Minutes</option>
   </select>
 
+  <!-- Custom Message -->
+  <textarea id="customText" rows="2" placeholder="এখানে যেকোনো মেসেজ লিখুন..."></textarea>
+  <button class="send" onclick="sendCustom()">SEND MESSAGE</button>
+
+  <!-- Signal Buttons -->
   <div class="signal-buttons">
+    <button class="start" onclick="sendSignal('START')">START</button>
+    <button class="off" onclick="sendSignal('OFF')">OFF</button>
+    <button class="hold" onclick="sendSignal('HOLD')">HOLD</button>
+
     <button class="big" onclick="sendSignal('BIG')">BIG</button>
     <button class="small" onclick="sendSignal('SMALL')">SMALL</button>
     <button class="green" onclick="sendSignal('GREEN 🟢')">GREEN</button>
+
     <button class="red" onclick="sendSignal('RED 🔴')">RED</button>
+    <button class="big" onclick="sendSignal('PROFIT 💸')">PROFIT</button>
   </div>
 </div>
 
-<!-- 👀 User View -->
+<!-- User Panel -->
 <div class="card">
   <h2>LIVE SIGNAL</h2>
   <div id="showWingo" class="signal-box wait">WAITING...</div>
   <div id="showSignal" class="signal-box wait">---</div>
+  <div id="showText" class="signal-box">---</div>
 </div>
 
 </div>
 
-<!-- 🔥 Firebase -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-/* 🔐 Admin Password */
-const ADMIN_PASSWORD = "12345"; // চাইলে বদলাবেন
+const ADMIN_PASSWORD = "12345";
 
 function login(){
-  if(document.getElementById("password").value === ADMIN_PASSWORD){
-    document.getElementById("loginBox").classList.add("hide");
-    document.getElementById("adminBox").classList.remove("hide");
+  if(password.value === ADMIN_PASSWORD){
+    loginBox.classList.add("hide");
+    adminBox.classList.remove("hide");
   }else{
     alert("Wrong Password");
   }
 }
 
-/* 🔥 Firebase Config */
 const firebaseConfig = {
   apiKey: "AIzaSyBmvhGbc7NA9uLdFGkvdWnej-SdgNzk5yk",
   authDomain: "big-small-86ed8.firebaseapp.com",
@@ -153,22 +181,29 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const signalRef = db.ref("liveSignal");
 
-/* 👑 Admin → Send Signal */
 function sendSignal(signal){
-  const wingo = document.getElementById("wingo").value;
   signalRef.set({
-    wingo: wingo,
-    signal: signal
+    wingo: wingo.value,
+    signal: signal,
+    text: ""
   });
 }
 
-/* 👥 User → Receive Signal */
+function sendCustom(){
+  if(customText.value.trim() === "") return;
+  signalRef.set({
+    wingo: wingo.value,
+    signal: "MESSAGE",
+    text: customText.value
+  });
+  customText.value = "";
+}
+
 signalRef.on("value", snap=>{
   if(!snap.exists()) return;
-
-  const data = snap.val();
-  document.getElementById("showWingo").innerText = data.wingo;
-  document.getElementById("showSignal").innerText = data.signal;
+  showWingo.innerText = snap.val().wingo;
+  showSignal.innerText = snap.val().signal;
+  showText.innerText = snap.val().text || "---";
 });
 </script>
 
